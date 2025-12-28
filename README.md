@@ -410,3 +410,16 @@ None of this replaces experiments, but it can make observational multi-omics ana
 
 If you only remember one rule:
 Adjust for confounders (common causes), not mediators (pathway variables), and not colliders (common effects).
+
+---
+
+## Further reading
+
+If you want deeper (but still practical) references:
+
+- DAGs, confounding, and modern causal inference: Hernán & Robins, *Causal Inference: What If* — https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/
+- Causality and graphical models (classic): Pearl, *Causality* — https://bayes.cs.ucla.edu/BOOK-2K/
+- Mediation analysis foundations: Imai, Keele, & Tingley (2010) — https://imai.fas.harvard.edu/research/mediation.html
+- The `mediation` R package paper: Tingley et al. (2014) — https://www.jstatsoft.org/article/view/v059i05
+- Double/debiased machine learning: Chernozhukov et al. (2018) — https://arxiv.org/abs/1608.00060
+- Compositional data analysis (why log-ratios): Aitchison (1986) — https://doi.org/10.1007/978-94-009-4109-0
