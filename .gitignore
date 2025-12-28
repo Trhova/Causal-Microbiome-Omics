@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.ipynb_checkpoints/
+
+.Rhistory
+.RData
+.Rproj.user/
+
+.DS_Store
+Thumbs.db
