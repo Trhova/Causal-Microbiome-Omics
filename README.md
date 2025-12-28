@@ -1,6 +1,6 @@
 # Causal-ish Omics: A Practical Guide with a Toy Microbiome → Metabolite → Outcome Example
 
-This repo is a beginner-friendly (but not dumbed-down) guide for people doing microbiome / metabolomics / multi-omics who want to get **closer** to causal answers.
+This repo is a guide for people doing microbiome / metabolomics / multi-omics who want to get **closer** to causal answers.
 
 It covers two common "causal-ish" tools:
 
@@ -69,7 +69,7 @@ That is the path:
 
 ---
 
-## 1) Terms you must know (with zero assumed background)
+## 1) Terms you must know (without assuming background)
 
 ### 1.0 Exposure, outcome, confounder, mediator (roles)
 - **Exposure (X)**: the thing you want the effect *of* (here: `BugA`).
@@ -400,83 +400,6 @@ If you screen features for association and then test mediation only in those, p-
 
 This is OK for discovery if you say so; be careful if claiming strict confirmatory inference.
 
----
-
-## 9) Suggested repo structure (so Codex can generate code cleanly)
-
-```
-.
-├── README.md
-├── data/
-│   └── toy_microbiome_metabolite_outcome.csv
-├── docs/
-│   ├── 01_core_concepts_dags_backdoor.md
-│   ├── 02_mediation_acme_ade_total.md
-│   └── 03_double_machine_learning_dml.md
-├── r/
-│   ├── 01_toy_data.R
-│   └── 02_mediation_mediation_pkg.R
-└── python/
-    ├── 01_toy_data.py
-    └── 02_dml_example.py
-```
-
----
-
-## 10) Minimal pseudo-code snippets (for Codex)
-
-### 10.1 Mediation (R, package mediation)
-Goal: BugA → Metabolite → Tumor, adjusting for Diet.
-
-```r
-library(mediation)
-
-# mediator model
-m_fit <- lm(Metabolite ~ BugA + Diet, data=df)
-
-# outcome model
-y_fit <- lm(Tumor ~ BugA + Metabolite + Diet, data=df)
-
-# mediation analysis: compare BugA "high" vs "low"
-# (for continuous BugA, pick two values, e.g. 0.15 vs 0.45)
-med <- mediate(
-  model.m = m_fit,
-  model.y = y_fit,
-  treat = "BugA",
-  mediator = "Metabolite",
-  treat.value = 0.45,
-  control.value = 0.15,
-  sims = 1000
-)
-
-summary(med)  # ACME (indirect), ADE (direct), total
-```
-
-### 10.2 DML (conceptual steps; implement with a DML library)
-Goal: estimate causal effect of BugA on Tumor adjusting for Diet + other bugs.
-
-```
-Inputs:
-  X = BugA (preferably CLR-transformed)
-  Y = Tumor
-  Z = [Diet, BugB, BugC, BugD, ... other confounders]
-
-Algorithm:
-  1) Fit ML model to predict X from Z  (train on fold A)
-  2) Compute leftover X on fold B: X_leftover = X - X_pred
-  3) Fit ML model to predict Y from Z  (train on fold A)
-  4) Compute leftover Y on fold B: Y_leftover = Y - Y_pred
-  5) Fit simple regression: Y_leftover ~ X_leftover (on fold B)
-  6) Repeat across folds, average effect
-```
-
----
-
-## 11) Final takeaway
-
-DAG thinking decides what you should adjust for.
-
-Mediation answers "how much is through the metabolite?"
 
 DML helps estimate effects when confounders are many/complex.
 
