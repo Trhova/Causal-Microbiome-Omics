@@ -398,6 +398,11 @@ If you screen features for association and then test mediation only in those, p-
 
 This is OK for discovery if you say so; be careful if claiming strict confirmatory inference.
 
+## 9) Final takeaway
+
+DAG thinking decides what you should adjust for.
+
+Mediation answers "how much is through the metabolite?"
 
 DML helps estimate effects when confounders are many/complex.
 
