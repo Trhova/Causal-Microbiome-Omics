@@ -377,8 +377,6 @@ If your goal is mechanism (microbe → metabolite → outcome): mediation is the
 
 If your goal is robust adjustment with many confounders: DML is often a better estimator.
 
-Advanced note (optional for future repo expansion):
-You can combine them: do mediation where the nuisance parts are estimated with ML / orthogonalization (a "DML-style mediation"). This is more complex but powerful.
 
 ---
 
