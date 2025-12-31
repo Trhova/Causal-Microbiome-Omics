@@ -26,6 +26,7 @@ None of this creates causality out of thin air. These methods give *causal inter
    1. [Why microbiome research often stays correlative](#11-why-microbiome-research-often-stays-correlative)
    2. [What causal inference can and cannot do](#12-what-causal-inference-can-and-cannot-do)
    3. [How to use this repo](#13-how-to-use-this-repo)
+   4. [Key references (frameworks and packages)](#14-key-references-frameworks-and-packages)
 2. [Quickstart (run the companion code)](#2-quickstart-run-the-companion-code)
 3. [The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)](#3-the-toy-dataset-4-patients-4-bugs-1-metabolite-1-outcome)
    1. [Data](#31-data)
@@ -102,6 +103,15 @@ This is a small, concrete walkthrough using toy data. It is designed to build in
 - If you want a fast run-through, start with the Quickstart section and run the scripts.
 - If you want the causal logic, read the DAG and backdoor sections before looking at the models.
 - If you want to apply this to real multi-omics, use the "Additional frameworks" section to pick a method that matches your study design.
+
+### 1.4 Key references (frameworks and packages)
+
+If you want the original papers and the most common software implementations used in practice:
+
+- Double machine learning (theory): Chernozhukov et al. (2018), "Double/debiased machine learning for treatment and structural parameters", *The Econometrics Journal*. https://arxiv.org/abs/1608.00060
+- Double machine learning (Python implementation): Bach et al. (2022), "DoubleML: An Object-Oriented Implementation of Double Machine Learning in Python", *Journal of Machine Learning Research*. https://www.jmlr.org/papers/v23/21-0867.html
+- Causal mediation analysis (theory): Imai, Keele, and Tingley (2010), "A General Approach to Causal Mediation Analysis", *Psychological Methods*. https://doi.org/10.1037/a0020761
+- Causal mediation analysis (R implementation): Tingley et al. (2014), "mediation: R Package for Causal Mediation Analysis", *Journal of Statistical Software*. https://www.jstatsoft.org/article/view/v059i05
 
 ---
 
