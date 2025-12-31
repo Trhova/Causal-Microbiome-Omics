@@ -2,6 +2,9 @@
 
 This document explains Double Machine Learning, a method to estimate causal effects in high-dimensional settings using machine learning for nuisance parameter estimation.
 
+Reference for the core idea:
+- Chernozhukov et al. (2018), "Double/debiased machine learning for treatment and structural parameters": https://arxiv.org/abs/1608.00060
+
 ## DML in Our Toy Example
 
 Estimate the effect of BugA on Tumor, adjusting for Diet, BugB, BugC, BugD.
@@ -27,7 +30,7 @@ ML handles complex relationships with confounders, but the final simple regressi
 
 ## Code
 
-See `python/02_dml_example.py` for a runnable demo (no `sklearn` dependency) that:
-- Cross-fits residuals (the key DML idea to avoid overfitting leakage)
-- Uses simple OLS as the stand-in “ML” step
+See `python/02_dml_example.py` for a runnable demo using the `doubleml` package:
+- Fits a partially linear regression DML model via `DoubleMLPLR`
+- Uses simple learners (`sklearn` linear regression) to keep the example easy to read
 - Also generates a larger synthetic dataset with the same variable names, since n=4 is too small to be stable

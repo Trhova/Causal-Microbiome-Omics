@@ -123,7 +123,7 @@ Python scripts assume Python 3.10+ and the small dependencies listed in `pyproje
 - `pip install -e .`
 
 - Inspect the toy data: `python python/01_toy_data.py` or `Rscript r/01_toy_data.R`
-- DML “leftovers + cross-fitting” demo (Python): `python python/02_dml_example.py`
+- DML demo using the `doubleml` package (Python): `python python/02_dml_example.py`
 - Mediation (ACME/ADE/Total; R): `Rscript r/02_mediation_mediation_pkg.R` (requires `mediation`)
 
 ## 3) The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)
