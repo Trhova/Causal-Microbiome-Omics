@@ -1,4 +1,4 @@
-# Causal-ish Omics: A Practical Guide with a Toy Microbiome → Metabolite → Outcome Example
+# Causal-ish Omics: A Practical Guide with a Toy Microbiome to Metabolite to Outcome Example
 
 This repo is a guide for people doing microbiome / metabolomics / multi-omics who want to get **closer** to causal answers.
 
@@ -15,18 +15,108 @@ It also explains the "must-know" concepts that make these methods make sense:
 - The backdoor criterion (what to adjust for, and what *not* to adjust for)
 - Why compositionality matters (microbiome relative abundances)
 
-**Important honesty statement:**  
+**Important honesty statement:**
 None of this creates causality out of thin air. These methods give *causal interpretations only if the assumptions are believable* (especially "no unmeasured confounding").
 
 ---
 
-## Quickstart (run the companion code)
+## Table of Contents
+
+1. [Introduction: From association to causal questions](#1-introduction-from-association-to-causal-questions)
+   1. [Why microbiome research often stays correlative](#11-why-microbiome-research-often-stays-correlative)
+   2. [What causal inference can and cannot do](#12-what-causal-inference-can-and-cannot-do)
+   3. [How to use this repo](#13-how-to-use-this-repo)
+2. [Quickstart (run the companion code)](#2-quickstart-run-the-companion-code)
+3. [The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)](#3-the-toy-dataset-4-patients-4-bugs-1-metabolite-1-outcome)
+   1. [Data](#31-data)
+   2. [The biological story we want to reason about](#32-the-biological-story-we-want-to-reason-about)
+   3. [Variable names (we will reuse these everywhere)](#33-variable-names-we-will-reuse-these-everywhere)
+4. [Terms you must know (without assuming background)](#4-terms-you-must-know-without-assuming-background)
+   1. [Exposure, outcome, confounder, mediator (roles)](#40-exposure-outcome-confounder-mediator-roles)
+   2. [Association vs causal effect](#41-association-vs-causal-effect)
+   3. [Bias (what it means)](#42-bias-what-it-means)
+   4. [Controlling for / adjusting for a variable](#43-controlling-for-adjusting-for-a-variable)
+5. [DAGs: the picture-language of causal thinking](#5-dags-the-picture-language-of-causal-thinking)
+   1. [Our toy DAG (what we think is happening)](#51-our-toy-dag-what-we-think-is-happening)
+   2. [Confounders, mediators, colliders (the three roles that matter)](#52-confounders-mediators-colliders-the-three-roles-that-matter)
+6. [The backdoor idea (how to decide what to adjust for)](#6-the-backdoor-idea-how-to-decide-what-to-adjust-for)
+   1. [What is a backdoor path?](#61-what-is-a-backdoor-path)
+   2. [Backdoor rule (plain language)](#62-backdoor-rule-plain-language)
+   3. [Adjustment cheat-sheet for this toy DAG](#63-adjustment-cheat-sheet-for-this-toy-dag)
+7. [Microbiome compositionality (why relative abundance changes things)](#7-microbiome-compositionality-why-relative-abundance-changes-things)
+   1. [What to do about it (practical)](#71-what-to-do-about-it-practical)
+8. [Tool #1: Causal Mediation Analysis (ACME / ADE / Total)](#8-tool-1-causal-mediation-analysis-acme-ade-total)
+   1. [What problem it answers](#81-what-problem-it-answers)
+   2. [The three key outputs (defined)](#82-the-three-key-outputs-defined)
+   3. [Why don’t control for mediators is usually correct](#83-why-dont-control-for-mediators-is-usually-correct)
+   4. [How mediation is done (simple steps, no fancy math)](#84-how-mediation-is-done-simple-steps-no-fancy-math)
+   5. [What do we adjust for in mediation?](#85-what-do-we-adjust-for-in-mediation)
+   6. [Plain-language interpretation](#86-plain-language-interpretation)
+   7. [Assumptions (in human words)](#87-assumptions-in-human-words)
+9. [Tool #2: Double Machine Learning (DML)](#9-tool-2-double-machine-learning-dml)
+   1. [What problem it answers](#91-what-problem-it-answers)
+   2. [What DML does (in plain language)](#92-what-dml-does-in-plain-language)
+   3. [What is a residual / leftover?](#93-what-is-a-residual-leftover)
+   4. [Why is it double machine learning?](#94-why-is-it-double-machine-learning)
+   5. [Cross-fitting (why DML isn’t cheating)](#95-cross-fitting-why-dml-isnt-cheating)
+   6. [What DML does NOT solve](#96-what-dml-does-not-solve)
+10. [How mediation and DML relate (and when to use which)](#10-how-mediation-and-dml-relate-and-when-to-use-which)
+   1. [Mediation analysis is about decomposing an effect](#101-mediation-analysis-is-about-decomposing-an-effect)
+   2. [DML is about estimating an effect under complex adjustment](#102-dml-is-about-estimating-an-effect-under-complex-adjustment)
+   3. [Which is better?](#103-which-is-better)
+11. [Common failure modes (how to accidentally fool yourself)](#11-common-failure-modes-how-to-accidentally-fool-yourself)
+   1. [Adjusting for the mediator when you want total effect](#111-adjusting-for-the-mediator-when-you-want-total-effect)
+   2. [Adjusting for a collider](#112-adjusting-for-a-collider)
+   3. [Compositionality ignored](#113-compositionality-ignored)
+   4. [Double dipping feature selection](#114-double-dipping-feature-selection)
+12. [Final takeaway](#12-final-takeaway)
+13. [Additional causal inference frameworks to consider](#13-additional-causal-inference-frameworks-to-consider)
+14. [Further reading](#14-further-reading)
+
+---
+
+## 1) Introduction: From association to causal questions
+
+Microbiome research has delivered many useful patterns. It has also produced a lot of results that do not replicate or do not translate into interventions. A common reason is that many studies answer "what is associated with what?" but not "what causes what?"
+
+### 1.1 Why microbiome research often stays correlative
+
+Early microbiome work (for example, many 16S surveys) was mainly descriptive. The goal was to map which microbes were present and how they differed across groups. That phase was valuable, but it set a culture where "microbe X is associated with outcome Y" is treated like a result, even when the causal story is unclear.
+
+There are also practical and social reasons. Causal work asks you to state assumptions, name likely confounders, and justify adjustment choices. That is harder than running a set of simple tests, and it often leads to smaller or null effects. It can also be harder to publish careful null results than exciting associations.
+
+This is problematic because microbiome data are highly correlated and compositional (everything sums to 100%). That makes spurious links easy to find. If we keep chasing unstable associations, we can waste resources and miss real mechanisms.
+
+### 1.2 What causal inference can and cannot do
+
+Observational causal inference does not replace randomized experiments. It cannot remove bias from unmeasured confounders, and it cannot turn weak data into proof.
+
+What it can do is help you ask sharper questions and be more honest about what your data can support. It forces you to write down a causal story (often as a DAG), decide what to adjust for, and check whether your conclusions depend on assumptions you would not defend.
+
+In practice, use causal methods as careful hypothesis generation. They can help you decide which microbes and pathways to test next, and which experiments would be most informative. Definitive evidence still comes from perturbation, randomization, and well-controlled study design.
+
+### 1.3 How to use this repo
+
+This is a small, concrete walkthrough using toy data. It is designed to build intuition, not to be a full pipeline.
+
+- If you want a fast run-through, start with the Quickstart section and run the scripts.
+- If you want the causal logic, read the DAG and backdoor sections before looking at the models.
+- If you want to apply this to real multi-omics, use the "Additional frameworks" section to pick a method that matches your study design.
+
+---
+
+## 2) Quickstart (run the companion code)
+
+Python scripts assume Python 3.10+ and the small dependencies listed in `pyproject.toml` (NumPy and pandas). A simple setup is:
+
+- `python -m venv .venv && source .venv/bin/activate`
+- `pip install -e .`
 
 - Inspect the toy data: `python python/01_toy_data.py` or `Rscript r/01_toy_data.R`
 - DML “leftovers + cross-fitting” demo (Python): `python python/02_dml_example.py`
 - Mediation (ACME/ADE/Total; R): `Rscript r/02_mediation_mediation_pkg.R` (requires `mediation`)
 
-## 0) The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)
+## 3) The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)
 
 We will use a tiny dataset to make every step concrete.
 
@@ -40,7 +130,7 @@ We will also include one extra variable:
 
 Why include Diet? Because without *some* confounder, there is nothing to "adjust away", and we can't illustrate why causal thinking matters.
 
-### Data
+### 3.1 Data
 
 | Patient | Diet (Z) | Bug A | Bug B | Bug C | Bug D | Metabolite M | Tumor volume (Y) |
 |--------:|:--------:|------:|------:|------:|------:|-------------:|-----------------:|
@@ -49,7 +139,7 @@ Why include Diet? Because without *some* confounder, there is nothing to "adjust
 | P3      | 1        | 0.40  | 0.20  | 0.25  | 0.15  | 2.0          | 55               |
 | P4      | 1        | 0.45  | 0.15  | 0.25  | 0.15  | 2.1          | 50               |
 
-### The biological story we want to reason about
+### 3.2 The biological story we want to reason about
 
 We *suspect*:
 - Diet affects the microbiome and tumor (Diet is a confounder)
@@ -60,7 +150,7 @@ That is the path:
 
 **Bug A → Metabolite M → Tumor volume**
 
-### Variable names (we will reuse these everywhere)
+### 3.3 Variable names (we will reuse these everywhere)
 
 - **Exposure / treatment** `X` = `BugA` (microbe feature we “pretend we could change”)
 - **Mediator** `M` = `Metabolite` (in-between variable on the pathway)
@@ -69,15 +159,15 @@ That is the path:
 
 ---
 
-## 1) Terms you must know (without assuming background)
+## 4) Terms you must know (without assuming background)
 
-### 1.0 Exposure, outcome, confounder, mediator (roles)
+### 4.0 Exposure, outcome, confounder, mediator (roles)
 - **Exposure (X)**: the thing you want the effect *of* (here: `BugA`).
 - **Outcome (Y)**: the thing you want the effect *on* (here: `Tumor`).
 - **Confounder (Z)**: a *common cause* of X and Y (here: `Diet`).
 - **Mediator (M)**: an *in-between* variable on the pathway X → M → Y (here: `Metabolite`).
 
-### 1.1 Association vs causal effect
+### 4.1 Association vs causal effect
 - **Association**: two variables move together in the data.
   - Example: "Patients with higher Bug A tend to have smaller tumors."
 - **Causal effect**: changing one variable would change another variable.
@@ -85,7 +175,7 @@ That is the path:
 
 Association is easy to see. Causal effect requires assumptions or experiments.
 
-### 1.2 "Bias" (what it means)
+### 4.2 "Bias" (what it means)
 **Bias** means your estimate is *systematically wrong*, even if you had infinite data.
 
 - **Random error**: noise that averages out with more samples.
@@ -95,7 +185,7 @@ Common causal biases:
 - **Confounding bias**: mixing up "A causes Y" with "something else causes both A and Y".
 - **Adjustment bias**: "controlling for" the wrong variable (like a mediator or a collider).
 
-### 1.3 "Controlling for / adjusting for" a variable
+### 4.3 "Controlling for / adjusting for" a variable
 "Adjusting for Z" means you compare people **as if Z were held fixed**, using one of these:
 - regression with Z as a covariate
 - matching on Z
@@ -106,14 +196,14 @@ In this guide, we usually mean the regression idea: include Z so comparisons hap
 
 ---
 
-## 2) DAGs: the picture-language of causal thinking
+## 5) DAGs: the picture-language of causal thinking
 
 A **DAG (Directed Acyclic Graph)** is just:
 - nodes = variables
 - arrows = "direct causal influence"
 - no cycles (no feedback loops in the diagram)
 
-### 2.1 Our toy DAG (what we *think* is happening)
+### 5.1 Our toy DAG (what we *think* is happening)
 
 ```mermaid
 graph LR
@@ -129,7 +219,7 @@ Read this as:
 - Bug A influences Metabolite
 - Metabolite influences Tumor
 
-### 2.2 Confounders, mediators, colliders (the three roles that matter)
+### 5.2 Confounders, mediators, colliders (the three roles that matter)
 
 #### Confounder
 A confounder is a variable that affects both the exposure and the outcome. In our DAG:
@@ -159,12 +249,12 @@ Why it matters: If you adjust for a collider (or analyze only a collider-defined
 
 ---
 
-## 3) The backdoor idea (how to decide what to adjust for)
+## 6) The backdoor idea (how to decide what to adjust for)
 
-### 3.1 What is a "backdoor path"?
+### 6.1 What is a "backdoor path"?
 A backdoor path is any path from Exposure (X) to Outcome (Y) that starts with an arrow into X. In our main DAG: BugA ← Diet → Tumor. This is a backdoor path (it starts with an arrow into BugA).
 
-### 3.2 Backdoor rule (plain language)
+### 6.2 Backdoor rule (plain language)
 To estimate the causal effect of X on Y, adjust for variables that:
 - block all backdoor paths from X to Y
 - without controlling for mediators or colliders
@@ -173,7 +263,7 @@ In our case, to estimate BugA → Tumor:
 - Adjusting for Diet blocks BugA ← Diet → Tumor
 - Do not adjust for Metabolite if you want the total effect (because it is on the pathway)
 
-### 3.3 Adjustment cheat-sheet for this toy DAG
+### 6.3 Adjustment cheat-sheet for this toy DAG
 
 | Question (always state this first) | Target effect | Adjust for | Do **not** adjust for |
 |---|---|---|---|
@@ -183,7 +273,7 @@ In our case, to estimate BugA → Tumor:
 
 ---
 
-## 4) Microbiome compositionality (why relative abundance changes things)
+## 7) Microbiome compositionality (why relative abundance changes things)
 
 Microbiome abundances are often compositional:
 Bug A + Bug B + Bug C + Bug D = 1
@@ -193,7 +283,7 @@ If Bug A goes up, at least one of B/C/D must go down (even if biology didn’t c
 
 This can create misleading associations.
 
-### 4.1 What to do about it (practical)
+### 7.1 What to do about it (practical)
 A common fix is to work in log-ratio space, e.g.:
 - CLR (centered log-ratio)
 - ALR (additive log-ratio)
@@ -208,27 +298,27 @@ After CLR/ALR, "Bug A increases" really means "Bug A increases relative to the r
 
 ---
 
-## 5) Tool #1: Causal Mediation Analysis (ACME / ADE / Total)
+## 8) Tool #1: Causal Mediation Analysis (ACME / ADE / Total)
 
-### 5.1 What problem it answers
+### 8.1 What problem it answers
 Mediation analysis answers questions like:
 - Total effect: "How much does Bug A affect Tumor overall?"
 - Indirect (mediated) effect: "How much of that effect goes through Metabolite M?"
 - Direct effect: "How much of Bug A’s effect is not through Metabolite M?"
 
-### 5.2 The three key outputs (defined)
+### 8.2 The three key outputs (defined)
 - Total effect: overall change in Y when X changes
 - ACME (Average Causal Mediation Effect): the indirect part (X → M → Y)
 - ADE (Average Direct Effect): the direct part (X → Y not through M)
 
 And they relate like this: Total = ACME + ADE
 
-### 5.3 Why "don’t control for mediators" is (usually) correct
+### 8.3 Why "don’t control for mediators" is (usually) correct
 If you want the total effect of BugA on Tumor, you generally should not adjust for Metabolite, because that blocks part of the causal pathway. But if you specifically want the direct effect, you do include Metabolite.
 
 Different question, different adjustment.
 
-### 5.4 How mediation is done (simple steps, no fancy math)
+### 8.4 How mediation is done (simple steps, no fancy math)
 To study Bug A → Metabolite → Tumor, you fit two models:
 - Mediator model: predict Metabolite from Bug A (and confounders)
   "Does Bug A shift the metabolite?"
@@ -238,21 +328,21 @@ To study Bug A → Metabolite → Tumor, you fit two models:
 Then the mediation framework combines these to estimate:
 ACME, ADE, Total
 
-### 5.5 What do we adjust for in mediation?
+### 8.5 What do we adjust for in mediation?
 If Diet affects both Bug A and Tumor, it is a confounder and should be adjusted for.
 
 So we include Diet in both models.
 - Mediator model: Metabolite ~ BugA + Diet
 - Outcome model: Tumor ~ BugA + Metabolite + Diet
 
-### 5.6 Plain-language interpretation
+### 8.6 Plain-language interpretation
 If ACME is negative (for tumor volume), you’d say:
 "Bug A appears to reduce tumor volume partly by increasing Metabolite M."
 
 If ADE is also negative:
 "Bug A also appears to reduce tumor volume through other routes beyond Metabolite M."
 
-### 5.7 Assumptions (in human words)
+### 8.7 Assumptions (in human words)
 Mediation needs stronger assumptions than "total effect" alone. The biggest one:
 After controlling for measured confounders (like Diet), there should not be hidden factors that affect both Metabolite and Tumor.
 
@@ -260,9 +350,9 @@ If unmeasured variables drive both Metabolite and Tumor, ACME can be biased.
 
 ---
 
-## 6) Tool #2: Double Machine Learning (DML)
+## 9) Tool #2: Double Machine Learning (DML)
 
-### 6.1 What problem it answers
+### 9.1 What problem it answers
 DML is for questions like:
 - "What is the causal effect of Bug A on Tumor, controlling for lots of confounders?"
 - "What is the causal effect of Bug A on Metabolite, controlling for lots of confounders?"
@@ -272,7 +362,7 @@ It is especially useful when:
 - relationships are nonlinear
 - you want valid uncertainty even though you used ML
 
-### 6.2 What DML does (in plain language)
+### 9.2 What DML does (in plain language)
 DML works by removing ("partialing out") what measured confounders can explain, then relating what’s left. For Bug A → Tumor, the key confounder in this toy story is `Diet` (in real omics you may have many more):
 
 Practical microbiome note: if you include microbiome features in the adjustment set, prefer **log-ratios** (CLR/ALR) rather than raw relative abundances.
@@ -289,7 +379,7 @@ Step C: Link leftovers
 - Ask: when leftover Bug A is higher, is leftover Tumor smaller?
 - This last step estimates the effect while reducing confounding.
 
-### 6.3 What is a "residual" / "leftover"?
+### 9.3 What is a "residual" / "leftover"?
 Residual = actual value − predicted value
 
 Example: Predict Bug A from Diet by using group means (toy-simple predictor):
@@ -329,13 +419,13 @@ Now compare leftovers:
 
 Within each Diet group, "more Bug A than expected" lines up with "smaller tumor than expected". That’s the core DML intuition.
 
-### 6.4 Why is it "double" machine learning?
+### 9.4 Why is it "double" machine learning?
 Because you use ML twice:
 - once to predict the exposure (Bug A)
 - once to predict the outcome (Tumor)
 Then you do a simple final step linking leftovers.
 
-### 6.5 Cross-fitting (why DML isn’t "cheating")
+### 9.5 Cross-fitting (why DML isn’t "cheating")
 If you use ML to predict Bug A and Tumor on the same data, ML can overfit and accidentally remove real signal. DML avoids this by cross-fitting:
 - split data into folds
 - train prediction models on one fold
@@ -344,7 +434,7 @@ If you use ML to predict Bug A and Tumor on the same data, ML can overfit and ac
 
 Toy datasets can’t show this well, but real DML always should.
 
-### 6.6 What DML does NOT solve
+### 9.6 What DML does NOT solve
 It does not remove bias from unmeasured confounders.
 
 It does not automatically decide what variables should be adjusted for (you still need DAG thinking).
@@ -353,16 +443,16 @@ If you adjust for mediators or colliders, DML can give very confident wrong answ
 
 ---
 
-## 7) How mediation and DML relate (and when to use which)
+## 10) How mediation and DML relate (and when to use which)
 
-### 7.1 Mediation analysis is about decomposing an effect
+### 10.1 Mediation analysis is about decomposing an effect
 Best when you want:
 "How much is through Metabolite vs not?"
 
 Outputs:
 ACME (indirect), ADE (direct), Total
 
-### 7.2 DML is about estimating an effect under complex adjustment
+### 10.2 DML is about estimating an effect under complex adjustment
 Best when you want:
 "What is the effect of Bug A on Tumor controlling for lots of stuff?"
 with high-dimensional covariates and flexible relationships
@@ -370,7 +460,7 @@ with high-dimensional covariates and flexible relationships
 Outputs:
 an effect estimate + uncertainty (for the chosen effect)
 
-### 7.3 Which is "better"?
+### 10.3 Which is "better"?
 Neither is universally better.
 
 If your goal is mechanism (microbe → metabolite → outcome): mediation is the natural framework.
@@ -380,25 +470,25 @@ If your goal is robust adjustment with many confounders: DML is often a better e
 
 ---
 
-## 8) Common failure modes (a.k.a. how to accidentally fool yourself)
+## 11) Common failure modes (how to accidentally fool yourself)
 
-### 8.1 "Adjusting for the mediator" when you want total effect
+### 11.1 "Adjusting for the mediator" when you want total effect
 If you estimate BugA → Tumor and include Metabolite as a covariate, you may erase the pathway BugA → Metabolite → Tumor. That can make a real effect look like zero.
 
-### 8.2 Adjusting for a collider
+### 11.2 Adjusting for a collider
 If Metabolite is influenced by both BugA and Tumor (BugA → Metabolite ← Tumor), adjusting for Metabolite can create a fake BugA–Tumor link.
 
-### 8.3 Compositionality ignored
+### 11.3 Compositionality ignored
 Using raw relative abundances in regression can create spurious relationships because of the sum-to-one constraint.
 
 Prefer log-ratio transforms (CLR/ALR).
 
-### 8.4 "Double dipping" feature selection
+### 11.4 "Double dipping" feature selection
 If you screen features for association and then test mediation only in those, p-values can become optimistic.
 
 This is OK for discovery if you say so; be careful if claiming strict confirmatory inference.
 
-## 9) Final takeaway
+## 12) Final takeaway
 
 DAG thinking decides what you should adjust for.
 
@@ -413,13 +503,37 @@ Adjust for confounders (common causes), not mediators (pathway variables), and n
 
 ---
 
-## Further reading
+## 13) Additional causal inference frameworks to consider
+
+This repo focuses on mediation and DML, but there are many other tools that can be a better match for a given study design. The key is to pick a framework that fits how your data were generated.
+
+| Framework | What it helps answer | When it fits best | Practical notes |
+|---|---|---|---|
+| Double machine learning (DML) | A causal effect with many covariates | High-dimensional observational data | Implementations: Python `econml`, `doubleml`; R `DoubleML`. |
+| Instrumental variables (IV) and Mendelian randomization (MR) | A causal effect when confounding is hard to measure | When you have a believable instrument (often genetics for MR) | Powerful, but validity is the whole game. If the instrument is weak or invalid, results can mislead. |
+| Difference-in-differences (DiD) and panel models | Causal effects from before vs after changes | Longitudinal data with a clear "shock" or intervention | Useful for repeated measures and natural experiments. Needs a plausible parallel trends story. |
+| Targeted maximum likelihood estimation (TMLE) | A causal effect with flexible models and good uncertainty | Observational studies, including longitudinal settings | Doubly robust under certain conditions. Commonly used in R (`tlverse`). |
+| G-computation (the g-formula) | "What would happen if we intervened?" predictions | When you can model the full system well | Clear counterfactual framing, but depends on model quality and confounding control. |
+| Causal forests and heterogeneous effects | "For whom does it work?" effect variation | When effects likely differ across subgroups | Implementations: Python `econml`; R `grf`. Treat as exploratory unless you pre-specify subgroups. |
+| Mediation analysis | Pathway decomposition (direct vs mediated) | When you have a mediator you believe is on-pathway | Strong assumptions about mediator-outcome confounding. Works well for mechanism questions. |
+| Causal discovery (DAG learning) | A candidate causal graph from data | Exploratory network structure learning | Needs strong assumptions and lots of data. Always validate with experiments. Tools: R `bnlearn`, Python `cdt`. |
+
+If you want a simple rule: match the method to your design first (cross-sectional, longitudinal, genetics, intervention). Then worry about modeling details.
+
+Microbiome-focused examples that pair well with the ideas above:
+
+- "Beyond just correlation: causal machine learning for the microbiome, from prediction to health policy with econometric tools" (open access): https://pmc.ncbi.nlm.nih.gov/articles/PMC10511707/
+- "Causal effects in microbiomes using interventional calculus" (Scientific Reports): https://www.nature.com/articles/s41598-021-84905-3
+
+---
+
+## 14) Further reading
 
 If you want deeper (but still practical) references:
 
-- DAGs, confounding, and modern causal inference: Hernán & Robins, *Causal Inference: What If* — https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/
-- Causality and graphical models (classic): Pearl, *Causality* — https://bayes.cs.ucla.edu/BOOK-2K/
-- Mediation analysis foundations: Imai, Keele, & Tingley (2010) — https://imai.fas.harvard.edu/research/mediation.html
-- The `mediation` R package paper: Tingley et al. (2014) — https://www.jstatsoft.org/article/view/v059i05
-- Double/debiased machine learning: Chernozhukov et al. (2018) — https://arxiv.org/abs/1608.00060
-- Compositional data analysis (why log-ratios): Aitchison (1986) — https://doi.org/10.1007/978-94-009-4109-0
+- DAGs, confounding, and modern causal inference: Hernán & Robins, *Causal Inference: What If*: https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/
+- Causality and graphical models (classic): Pearl, *Causality*: https://bayes.cs.ucla.edu/BOOK-2K/
+- Mediation analysis foundations: Imai, Keele, & Tingley (2010): https://imai.fas.harvard.edu/research/mediation.html
+- The `mediation` R package paper: Tingley et al. (2014): https://www.jstatsoft.org/article/view/v059i05
+- Double/debiased machine learning: Chernozhukov et al. (2018): https://arxiv.org/abs/1608.00060
+- Compositional data analysis (why log-ratios): Aitchison (1986): https://doi.org/10.1007/978-94-009-4109-0
