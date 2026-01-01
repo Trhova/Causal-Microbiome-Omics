@@ -27,6 +27,7 @@ None of this creates causality out of thin air. These methods give *causal inter
    2. [What causal inference can and cannot do](#12-what-causal-inference-can-and-cannot-do)
    3. [How to use this repo](#13-how-to-use-this-repo)
    4. [Key references (frameworks and packages)](#14-key-references-frameworks-and-packages)
+   5. [Publications in microbiome spaces using DML or mediation analysis](#15-publications-in-microbiome-spaces-using-dml-or-mediation-analysis)
 2. [Quickstart (run the companion code)](#2-quickstart-run-the-companion-code)
 3. [The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)](#3-the-toy-dataset-4-patients-4-bugs-1-metabolite-1-outcome)
    1. [Data](#31-data)
@@ -112,6 +113,16 @@ If you want the original papers and the most common software implementations use
 - Double machine learning (Python implementation): Bach et al. (2022), "DoubleML: An Object-Oriented Implementation of Double Machine Learning in Python", *Journal of Machine Learning Research*. https://www.jmlr.org/papers/v23/21-0867.html
 - Causal mediation analysis (theory): Imai, Keele, and Tingley (2010), "A General Approach to Causal Mediation Analysis", *Psychological Methods*. https://doi.org/10.1037/a0020761
 - Causal mediation analysis (R implementation): Tingley et al. (2014), "mediation: R Package for Causal Mediation Analysis", *Journal of Statistical Software*. https://www.jstatsoft.org/article/view/v059i05
+
+### 1.5 Publications in microbiome spaces using DML or mediation analysis
+
+Recent microbiome papers use causal methods to move from links to testable effect and mechanism questions. A few examples to skim:
+
+- Wu et al. (2025), *Nature Medicine*: "Microbiome–metabolome dynamics associated with impaired glucose control and responses to lifestyle changes". https://doi.org/10.1038/s41591-025-03642-6
+- Litichevskiy et al. (2025), *Nature Microbiology*: "Microbiome ageing in genetically diverse mice". https://doi.org/10.1038/s41564-025-01964-2
+- Chen et al. (2024), *Gut Microbes*: "Machine learning-causal inference based on multi-omics data reveals the association of altered gut bacteria and bile acid metabolism with neonatal jaundice". https://doi.org/10.1080/19490976.2024.2388805
+- Wu et al. (2022), *Journal of Advanced Research*: "Gut microbiota specifically mediates the anti-hypercholesterolemic effect of berberine (BBR) and facilitates to predict BBR’s cholesterol-decreasing efficacy in patients". https://doi.org/10.1016/j.jare.2021.07.011
+- Chen, Nguyen, and Liu (2025), *Journal of Data Science*: "High-dimensional Confounding in Causal Mediation: A Comparison Study of Double Machine Learning and Regularized Partial Correlation Network". https://doi.org/10.6339/25-jds1169
 
 ---
 
