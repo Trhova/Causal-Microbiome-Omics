@@ -30,50 +30,18 @@ None of this creates causality out of thin air. These methods give *causal inter
    5. [Publications in microbiome spaces using DML or mediation analysis](#15-publications-in-microbiome-spaces-using-dml-or-mediation-analysis)
 2. [Quickstart (run the companion code)](#2-quickstart-run-the-companion-code)
 3. [The toy dataset (4 patients, 4 bugs, 1 metabolite, 1 outcome)](#3-the-toy-dataset-4-patients-4-bugs-1-metabolite-1-outcome)
-   1. [Data](#31-data)
-   2. [The biological story we want to reason about](#32-the-biological-story-we-want-to-reason-about)
-   3. [Variable names (we will reuse these everywhere)](#33-variable-names-we-will-reuse-these-everywhere)
 4. [Terms you must know (without assuming background)](#4-terms-you-must-know-without-assuming-background)
-   1. [Exposure, outcome, confounder, mediator (roles)](#40-exposure-outcome-confounder-mediator-roles)
-   2. [Association vs causal effect](#41-association-vs-causal-effect)
-   3. [Bias (what it means)](#42-bias-what-it-means)
-   4. [Controlling for / adjusting for a variable](#43-controlling-for-adjusting-for-a-variable)
 5. [DAGs: the picture-language of causal thinking](#5-dags-the-picture-language-of-causal-thinking)
-   1. [Our toy DAG (what we think is happening)](#51-our-toy-dag-what-we-think-is-happening)
-   2. [Confounders, mediators, colliders (the three roles that matter)](#52-confounders-mediators-colliders-the-three-roles-that-matter)
 6. [The backdoor idea (how to decide what to adjust for)](#6-the-backdoor-idea-how-to-decide-what-to-adjust-for)
-   1. [What is a backdoor path?](#61-what-is-a-backdoor-path)
-   2. [Backdoor rule (plain language)](#62-backdoor-rule-plain-language)
-   3. [Adjustment cheat-sheet for this toy DAG](#63-adjustment-cheat-sheet-for-this-toy-dag)
 7. [Microbiome compositionality (why relative abundance changes things)](#7-microbiome-compositionality-why-relative-abundance-changes-things)
-   1. [What to do about it (practical)](#71-what-to-do-about-it-practical)
 8. [Tool #1: Causal Mediation Analysis (ACME / ADE / Total)](#8-tool-1-causal-mediation-analysis-acme-ade-total)
-   1. [What problem it answers](#81-what-problem-it-answers)
-   2. [The three key outputs (defined)](#82-the-three-key-outputs-defined)
-   3. [Why don’t control for mediators is usually correct](#83-why-dont-control-for-mediators-is-usually-correct)
-   4. [How mediation is done (simple steps, no fancy math)](#84-how-mediation-is-done-simple-steps-no-fancy-math)
-   5. [What do we adjust for in mediation?](#85-what-do-we-adjust-for-in-mediation)
-   6. [Plain-language interpretation](#86-plain-language-interpretation)
-   7. [Assumptions (in human words)](#87-assumptions-in-human-words)
 9. [Tool #2: Double Machine Learning (DML)](#9-tool-2-double-machine-learning-dml)
-   1. [What problem it answers](#91-what-problem-it-answers)
-   2. [What DML does (in plain language)](#92-what-dml-does-in-plain-language)
-   3. [What is a residual / leftover?](#93-what-is-a-residual-leftover)
-   4. [Why is it double machine learning?](#94-why-is-it-double-machine-learning)
-   5. [Cross-fitting (why DML isn’t cheating)](#95-cross-fitting-why-dml-isnt-cheating)
-   6. [What DML does NOT solve](#96-what-dml-does-not-solve)
-10. [How mediation and DML relate (and when to use which)](#10-how-mediation-and-dml-relate-and-when-to-use-which)
-   1. [Mediation analysis is about decomposing an effect](#101-mediation-analysis-is-about-decomposing-an-effect)
-   2. [DML is about estimating an effect under complex adjustment](#102-dml-is-about-estimating-an-effect-under-complex-adjustment)
-   3. [Which is better?](#103-which-is-better)
-11. [Common failure modes (how to accidentally fool yourself)](#11-common-failure-modes-how-to-accidentally-fool-yourself)
-   1. [Adjusting for the mediator when you want total effect](#111-adjusting-for-the-mediator-when-you-want-total-effect)
-   2. [Adjusting for a collider](#112-adjusting-for-a-collider)
-   3. [Compositionality ignored](#113-compositionality-ignored)
-   4. [Double dipping feature selection](#114-double-dipping-feature-selection)
-12. [Final takeaway](#12-final-takeaway)
-13. [Additional causal inference frameworks to consider](#13-additional-causal-inference-frameworks-to-consider)
-14. [Further reading](#14-further-reading)
+10. [Further considerations](#10-further-considerations)
+   1. [How mediation and DML relate](#101-how-mediation-and-dml-relate-and-when-to-use-which)
+   2. [Common failure modes](#102-common-failure-modes-how-to-accidentally-fool-yourself)
+   3. [Final takeaway](#103-final-takeaway)
+   4. [Additional causal inference frameworks](#104-additional-causal-inference-frameworks-to-consider)
+   5. [Further reading](#105-further-reading)
 
 ---
 
@@ -472,16 +440,18 @@ If you adjust for mediators or colliders, DML can give very confident wrong answ
 
 ---
 
-## 10) How mediation and DML relate (and when to use which)
+## 10) Further considerations
 
-### 10.1 Mediation analysis is about decomposing an effect
+### 10.1 How mediation and DML relate (and when to use which)
+
+#### 10.1.1 Mediation analysis is about decomposing an effect
 Best when you want:
 "How much is through Metabolite vs not?"
 
 Outputs:
 ACME (indirect), ADE (direct), Total
 
-### 10.2 DML is about estimating an effect under complex adjustment
+#### 10.1.2 DML is about estimating an effect under complex adjustment
 Best when you want:
 "What is the effect of Bug A on Tumor controlling for lots of stuff?"
 with high-dimensional covariates and flexible relationships
@@ -489,7 +459,7 @@ with high-dimensional covariates and flexible relationships
 Outputs:
 an effect estimate + uncertainty (for the chosen effect)
 
-### 10.3 Which is "better"?
+#### 10.1.3 Which is "better"?
 Neither is universally better.
 
 If your goal is mechanism (microbe → metabolite → outcome): mediation is the natural framework.
@@ -497,27 +467,25 @@ If your goal is mechanism (microbe → metabolite → outcome): mediation is the
 If your goal is robust adjustment with many confounders: DML is often a better estimator.
 
 
----
+### 10.2 Common failure modes (how to accidentally fool yourself)
 
-## 11) Common failure modes (how to accidentally fool yourself)
-
-### 11.1 "Adjusting for the mediator" when you want total effect
+#### 10.2.1 Adjusting for the mediator when you want total effect
 If you estimate BugA → Tumor and include Metabolite as a covariate, you may erase the pathway BugA → Metabolite → Tumor. That can make a real effect look like zero.
 
-### 11.2 Adjusting for a collider
+#### 10.2.2 Adjusting for a collider
 If Metabolite is influenced by both BugA and Tumor (BugA → Metabolite ← Tumor), adjusting for Metabolite can create a fake BugA–Tumor link.
 
-### 11.3 Compositionality ignored
+#### 10.2.3 Compositionality ignored
 Using raw relative abundances in regression can create spurious relationships because of the sum-to-one constraint.
 
 Prefer log-ratio transforms (CLR/ALR).
 
-### 11.4 "Double dipping" feature selection
+#### 10.2.4 Double dipping feature selection
 If you screen features for association and then test mediation only in those, p-values can become optimistic.
 
 This is OK for discovery if you say so; be careful if claiming strict confirmatory inference.
 
-## 12) Final takeaway
+### 10.3 Final takeaway
 
 DAG thinking decides what you should adjust for.
 
@@ -530,9 +498,7 @@ None of this replaces experiments, but it can make observational multi-omics ana
 If you only remember one rule:
 Adjust for confounders (common causes), not mediators (pathway variables), and not colliders (common effects).
 
----
-
-## 13) Additional causal inference frameworks to consider
+### 10.4 Additional causal inference frameworks to consider
 
 This repo focuses on mediation and DML, but there are many other tools that can be a better match for a given study design. The key is to pick a framework that fits how your data were generated.
 
@@ -554,9 +520,7 @@ Microbiome-focused examples that pair well with the ideas above:
 - "Beyond just correlation: causal machine learning for the microbiome, from prediction to health policy with econometric tools" (open access): https://pmc.ncbi.nlm.nih.gov/articles/PMC10511707/
 - "Causal effects in microbiomes using interventional calculus" (Scientific Reports): https://www.nature.com/articles/s41598-021-84905-3
 
----
-
-## 14) Further reading
+### 10.5 Further reading
 
 If you want deeper (but still practical) references:
 
