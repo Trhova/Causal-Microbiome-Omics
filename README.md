@@ -404,9 +404,9 @@ Here is the same idea as a single table. In the Python example, `doubleml` runs 
 
 | Step | What you are trying to remove ("adjust away") | ML model you fit (toy version shown) | Output | "Leftover" (residual) you compute | Interpretation in this toy dataset |
 |---|---|---|---|---|---|
-| A. Predict exposure | The part of `BugA` explained by confounders (`Diet`, and optionally other bugs) | `BugA ~ Diet (+ BugB + BugC + BugD)` (toy-simple: group mean by `Diet`) | `BugA_hat` (predicted `BugA`) | `BugA_res = BugA - BugA_hat` | `BugA` variation not explained by `Diet` (and other included bugs) |
-| B. Predict outcome | The part of `Tumor` explained by confounders (`Diet`, and optionally other bugs) | `Tumor ~ Diet (+ BugB + BugC + BugD)` (toy-simple: group mean by `Diet`) | `Tumor_hat` (predicted `Tumor`) | `Tumor_res = Tumor - Tumor_hat` | `Tumor` variation not explained by `Diet` (and other included bugs) |
-| C. Link leftovers | Remaining confounding after partialing out | `Tumor_res ~ BugA_res` (simple regression) | $\hat{\\theta}$ | (none) | $\hat{\\theta}$ is the estimated causal effect of `BugA` on `Tumor` (under assumptions), using only variation not attributed to the adjustment set |
+| A. Predict exposure | The part of `BugA` explained by confounders (`Diet`, and optionally other bugs) | `BugA ~ Diet (+ BugB + BugC + BugD)` (toy-simple: group mean by `Diet`) | $\hat{X}$ (predicted `BugA`) | $X_{res} = X - \\hat{X}$ | `BugA` variation not explained by `Diet` (and other included bugs) |
+| B. Predict outcome | The part of `Tumor` explained by confounders (`Diet`, and optionally other bugs) | `Tumor ~ Diet (+ BugB + BugC + BugD)` (toy-simple: group mean by `Diet`) | $\hat{Y}$ (predicted `Tumor`) | $Y_{res} = Y - \\hat{Y}$ | `Tumor` variation not explained by `Diet` (and other included bugs) |
+| C. Link leftovers | Remaining confounding after partialing out | $Y_{res} \\sim X_{res}$ (simple regression) | $\hat{\\theta}$ | (none) | $\hat{\\theta}$ is the estimated causal effect of `BugA` on `Tumor` (under assumptions), using only variation not attributed to the adjustment set |
 
 ### 9.3 What is a "residual" / "leftover"?
 Residual = actual value − predicted value
