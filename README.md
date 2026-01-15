@@ -331,7 +331,7 @@ If ACME is negative (for tumor volume), you’d say:
 If ADE is also negative:
 "Bug A also appears to reduce tumor volume through other routes beyond Metabolite M."
 
-### 8.7 Assumptions (in human words)
+### 8.7 Assumptions
 Mediation needs stronger assumptions than "total effect" alone. The biggest one:
 After controlling for measured confounders (like Diet), there should not be hidden factors that affect both Metabolite and Tumor.
 
